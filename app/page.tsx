@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 // ==========================================
 // 1. CONFIGURACIÓN DE IMÁGENES EXACTAS
 // ==========================================
-const SPLASH_BG_IMAGE = 'https://i.pinimg.com/736x/f9/19/8d/f9198d0f8ff5d994c840f9f1167ddaca.jpg';
+const SPLASH_BG_IMAGE = 'https://i.pinimg.com/736x/52/96/d7/5296d7d75038c878e9fe279a83eabbff.jpg';
 const JESUS_IMAGE_URL = 'https://i.pinimg.com/1200x/d2/b3/f0/d2b3f032df40e23e4083ada49899f7c4.jpg';
 const HOME_BG_IMAGE = 'https://i.pinimg.com/736x/49/9f/9c/499f9c29aaa32d7dc3ef14be1eb1de26.jpg';
 
