@@ -5,11 +5,11 @@ import React, { useState, useEffect } from 'react';
 // ==========================================
 // 1. CONFIGURACIÓN DE IMÁGENES EXACTAS
 // ==========================================
-const SPLASH_BG_IMAGE = 'https://i.pinimg.com/736x/52/96/d7/5296d7d75038c878e9fe279a83eabbff.jpg';
+const SPLASH_BG_IMAGE = 'https://i.pinimg.com/736x/f9/19/8d/f9198d0f8ff5d994c840f9f1167ddaca.jpg';
 const JESUS_IMAGE_URL = 'https://i.pinimg.com/1200x/d2/b3/f0/d2b3f032df40e23e4083ada49899f7c4.jpg';
 const HOME_BG_IMAGE = 'https://i.pinimg.com/736x/49/9f/9c/499f9c29aaa32d7dc3ef14be1eb1de26.jpg';
 
-// Fotos del carrusel automático a 3/4 de pantalla
+// Fotos del carrusel a 3/4 de pantalla
 const BANNER_IMAGES = [
   'https://i.pinimg.com/736x/49/9f/9c/499f9c29aaa32d7dc3ef14be1eb1de26.jpg',
   'https://i.pinimg.com/1200x/13/6d/09/136d09c272260d30cffa1e97027a241e.jpg',
@@ -17,12 +17,12 @@ const BANNER_IMAGES = [
 ];
 
 // ==========================================
-// 2. NÚMERO WHATSAPP DE LOS LÍDERES
+// 2. NÚMERO DE WHATSAPP DONDE LLEGAN TODAS LAS RESERVAS
 // ==========================================
 const LEADERS_GLOBAL_WHATSAPP = '573102345742';
 
 // ==========================================
-// 3. LÍDERES CON MENSAJES PERSONALIZADOS
+// 3. LÍDERES
 // ==========================================
 interface Leader {
   id: string;
@@ -87,14 +87,14 @@ export default function ChurchInteractiveBooking() {
   // Modo: usuario vs líder
   const [viewMode, setViewMode] = useState<'user' | 'leader'>('user');
 
-  // Tipo de vista de calendario: 'week' (por semanas espacioso) o 'month' (mes completo)
+  // Tipo de vista de calendario: 'week' (por semanas) o 'month' (mes completo)
   const [calendarView, setCalendarView] = useState<'week' | 'month'>('week');
-  const [currentWeekIndex, setCurrentWeekIndex] = useState(1); // Semana 2 por defecto
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(1);
 
   // Selección
   const [selectedLeader, setSelectedLeader] = useState<Leader>(LEADERS[0]);
   const [currentMonthIndex, setCurrentMonthIndex] = useState(2); // Marzo 2026
-  const [expandedDayNumber, setExpandedDayNumber] = useState<number | null>(10); // Día desplegado
+  const [expandedDayNumber, setExpandedDayNumber] = useState<number | null>(10);
 
   // Formulario de reserva
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -113,10 +113,12 @@ export default function ChurchInteractiveBooking() {
     modalityText: string;
   } | null>(null);
 
-  // Formulario del líder para añadir horas
+  // Formulario del líder
   const [newTimeInput, setNewTimeInput] = useState('');
 
-  // Base de datos reactiva local
+  // ==========================================
+  // PERSISTENCIA DE DATOS CON LOCALSTORAGE
+  // ==========================================
   const [agendaDB, setAgendaDB] = useState<Record<string, DaySchedule>>({
     'male_2_10': {
       isOpen: true,
@@ -140,6 +142,27 @@ export default function ChurchInteractiveBooking() {
     },
   });
 
+  // 1. Cargar datos guardados previamente al montar
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('church_ministration_agenda_2026');
+      if (savedData) {
+        setAgendaDB(JSON.parse(savedData));
+      }
+    } catch (e) {
+      console.error('Error al leer de localStorage', e);
+    }
+  }, []);
+
+  // 2. Guardar automáticamente cada vez que cambie agendaDB
+  useEffect(() => {
+    try {
+      localStorage.setItem('church_ministration_agenda_2026', JSON.stringify(agendaDB));
+    } catch (e) {
+      console.error('Error al guardar en localStorage', e);
+    }
+  }, [agendaDB]);
+
   // Splash timeout
   useEffect(() => {
     const fadeTimer = setTimeout(() => setSplashFade(true), 1800);
@@ -150,7 +173,7 @@ export default function ChurchInteractiveBooking() {
     };
   }, []);
 
-  // Intervalo del carrusel (3.5s)
+  // Intervalo del carrusel automático (3.5s)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBannerIndex((prev) => (prev + 1) % BANNER_IMAGES.length);
@@ -177,7 +200,6 @@ export default function ChurchInteractiveBooking() {
     };
   };
 
-  // Cálculo de días del mes
   const generateMonthData = (monthIndex: number) => {
     const year = 2026;
     const firstDayIndex = (new Date(year, monthIndex, 1).getDay() + 6) % 7;
@@ -189,7 +211,6 @@ export default function ChurchInteractiveBooking() {
 
   const { blanks, days, totalDays } = generateMonthData(currentMonthIndex);
 
-  // Agrupar en semanas para la vista semanal
   const weeks: number[][] = [];
   let tempWeek: number[] = [];
   for (let d = 1; d <= totalDays; d++) {
@@ -263,7 +284,7 @@ export default function ChurchInteractiveBooking() {
     }
   };
 
-  // Agendar y notificar al líder
+  // Agendar y enviar mensaje directo al 3102345742
   const handleBookAppointment = (dayNum: number) => {
     if (!userName.trim() || !userPhone.trim() || !selectedSlotId) return;
     const key = getDayKey(dayNum);
@@ -297,6 +318,7 @@ export default function ChurchInteractiveBooking() {
     setLastBooking(bookingInfo);
     setBookingSuccess(true);
 
+    // Mensaje directo al WhatsApp 3102345742
     const leaderMessage = encodeURIComponent(
       `¡Hola equipo pastoral! 🕊️\n\n` +
       `Se ha reservado una nueva cita de ministración con *${bookingInfo.leader.name}* (${bookingInfo.leader.role}):\n\n` +
@@ -306,13 +328,13 @@ export default function ChurchInteractiveBooking() {
       `⏰ *Hora:* ${bookingInfo.time}\n` +
       `📍 *Modalidad:* ${bookingInfo.modalityText}\n` +
       `🕊 *Propósito:* ${bookingInfo.leader.focusMessage}\n\n` +
-      `¡Notificación enviada con éxito!`
+      `¡Notificación enviada al 3102345742!`
     );
 
     window.open(`https://wa.me/${LEADERS_GLOBAL_WHATSAPP}?text=${leaderMessage}`, '_blank');
   };
 
-  // Enviar comprobante al WhatsApp del usuario
+  // Enviar copia al WhatsApp de quien agenda
   const handleSendToUserWhatsApp = () => {
     if (!lastBooking) return;
     const rawNumber = lastBooking.personPhone.startsWith('57')
@@ -321,7 +343,7 @@ export default function ChurchInteractiveBooking() {
 
     const userMessage = encodeURIComponent(
       `¡Hola ${lastBooking.personName}! ✨\n\n` +
-      `Tu cita de ministración con *${lastBooking.leader.name}* ha quedado agendada con bendición.\n\n` +
+      `Tu cita de ministración con *${lastBooking.leader.name}* ha quedado agendada con bendición:\n\n` +
       `🗓 *Fecha:* ${lastBooking.date}\n` +
       `⏰ *Hora:* ${lastBooking.time}\n` +
       `📍 *Lugar:* ${lastBooking.modalityText}\n` +
@@ -335,7 +357,7 @@ export default function ChurchInteractiveBooking() {
   return (
     <div className="relative min-h-screen w-full flex flex-col bg-[#080a0d] text-neutral-100 font-sans selection:bg-sky-500/30 overflow-x-hidden">
       
-      {/* Fuentes editoriales */}
+      {/* Tipografías */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&family=Playfair+Display:ital,wght@1,500;1,600&display=swap');
         
@@ -421,7 +443,7 @@ export default function ChurchInteractiveBooking() {
         </div>
       </header>
 
-      {/* 3. BANNER CARRUSEL A 3/4 DE PANTALLA (h-[75vh]) */}
+      {/* 3. BANNER CARRUSEL AUTOMÁTICO A 3/4 DE PANTALLA (h-[75vh]) */}
       <section className="relative w-full h-[75vh] overflow-hidden border-b border-white/10 bg-neutral-950">
         {BANNER_IMAGES.map((img, idx) => (
           <div
@@ -511,11 +533,11 @@ export default function ChurchInteractiveBooking() {
         </div>
       </section>
 
-      {/* 5. CALENDARIO CON OPCIÓN POR SEMANA O MES Y DESPLIEGUE FLUIDO */}
+      {/* 5. CALENDARIO CON PERSISTENCIA Y WHATSAPP 3102345742 */}
       <section className="w-full max-w-5xl mx-auto px-4 mb-16">
         <div className="bg-[#11141a] border border-white/10 rounded-3xl p-5 sm:p-8 shadow-2xl">
           
-          {/* Header del Calendario y Controles */}
+          {/* Header del Calendario */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
             <div>
               <span className="text-[10px] uppercase tracking-widest text-sky-400 font-bold block mb-1">
@@ -529,7 +551,7 @@ export default function ChurchInteractiveBooking() {
               </p>
             </div>
 
-            {/* Alternador de vista: Por Semana vs Mes completo */}
+            {/* Alternador de vista: Semana vs Mes */}
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex bg-white/5 p-1 rounded-full border border-white/10 text-xs">
                 <button
@@ -597,9 +619,7 @@ export default function ChurchInteractiveBooking() {
             </div>
           </div>
 
-          {/* ========================================================
-              VISTA 1: POR SEMANA (TARJETAS GRANDES Y ESPACIOSAS)
-             ======================================================== */}
+          {/* VISTA 1: POR SEMANA */}
           {calendarView === 'week' && (
             <div className="pt-6">
               <span className="text-xs text-neutral-400 block mb-4">
@@ -624,7 +644,6 @@ export default function ChurchInteractiveBooking() {
                           : 'border-red-500/20 bg-[#14171d]/40 opacity-70'
                       }`}
                     >
-                      {/* Cabecera del día (Click para desplegar) */}
                       <button
                         onClick={() => setExpandedDayNumber(isExpanded ? null : dayNum)}
                         className="w-full p-4 sm:p-5 flex items-center justify-between text-left outline-none"
@@ -677,11 +696,10 @@ export default function ChurchInteractiveBooking() {
                         </div>
                       </button>
 
-                      {/* CONTENIDO DESPLEGABLE DEL DÍA (ACCORDION) */}
+                      {/* CONTENIDO DESPLEGABLE */}
                       {isExpanded && (
                         <div className="px-4 sm:px-6 pb-6 pt-2 border-t border-white/10 animate-in fade-in slide-in-from-top-2 duration-300">
                           {viewMode === 'leader' ? (
-                            /* Modo Líder dentro del día */
                             <div className="space-y-4 pt-3">
                               <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
                                 <span className="text-xs text-neutral-300">
@@ -724,7 +742,7 @@ export default function ChurchInteractiveBooking() {
                                     <div>
                                       <span className="font-bold block text-white">{slot.time}</span>
                                       <span className="text-[10px] text-neutral-400">
-                                        {slot.bookedBy ? `Reservado: ${slot.bookedBy}` : 'Libre'}
+                                        {slot.bookedBy ? `Reservado: ${slot.bookedBy} (${slot.phone})` : 'Libre'}
                                       </span>
                                     </div>
                                     <button
@@ -738,7 +756,6 @@ export default function ChurchInteractiveBooking() {
                               </div>
                             </div>
                           ) : (
-                            /* Modo Usuario para agendar */
                             hasFreeSlots ? (
                               <div className="space-y-4 pt-3">
                                 <div>
@@ -841,7 +858,7 @@ export default function ChurchInteractiveBooking() {
                                   {bookingSuccess ? (
                                     <div className="space-y-2 animate-in zoom-in-95">
                                       <div className="p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-center text-xs text-emerald-300 font-bold">
-                                        ✓ ¡Cita reservada con {selectedLeader.name}! Notificando por WhatsApp...
+                                        ✓ ¡Cita reservada con {selectedLeader.name}! Notificando al 3102345742...
                                       </div>
                                       <button
                                         onClick={handleSendToUserWhatsApp}
@@ -856,7 +873,7 @@ export default function ChurchInteractiveBooking() {
                                       onClick={() => handleBookAppointment(dayNum)}
                                       className="w-full py-3.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-neutral-950 font-bold text-xs uppercase tracking-wider shadow-lg shadow-sky-500/20 transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 font-editorial-bold"
                                     >
-                                      Confirmar y Enviar al WhatsApp de {selectedLeader.name} →
+                                      Confirmar y Enviar al WhatsApp de {selectedLeader.name} (3102345742) →
                                     </button>
                                   )}
                                 </div>
@@ -876,9 +893,7 @@ export default function ChurchInteractiveBooking() {
             </div>
           )}
 
-          {/* ========================================================
-              VISTA 2: MES COMPLETO (CUADRÍCULA AMPLIA)
-             ======================================================== */}
+          {/* VISTA 2: MES COMPLETO */}
           {calendarView === 'month' && (
             <div className="pt-6">
               <div className="grid grid-cols-7 text-center text-xs font-bold text-neutral-400 mb-3 font-editorial-bold">
@@ -902,7 +917,7 @@ export default function ChurchInteractiveBooking() {
                       key={dayNum}
                       onClick={() => {
                         setExpandedDayNumber(dayNum);
-                        setCalendarView('week'); // Al tocar un día en el mes, salta a la vista semanal y lo abre
+                        setCalendarView('week');
                         const weekIdx = weeks.findIndex((w) => w.includes(dayNum));
                         if (weekIdx !== -1) setCurrentWeekIndex(weekIdx);
                       }}
