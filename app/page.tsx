@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 // ==========================================
 // 1. CONFIGURACIÓN DE IMÁGENES EXACTAS
 // ==========================================
-const SPLASH_BG_IMAGE = 'https://i.pinimg.com/736x/f9/19/8d/f9198d0f8ff5d994c840f9f1167ddaca.jpg';
+const SPLASH_BG_IMAGE = 'https://i.pinimg.com/736x/52/96/d7/5296d7d75038c878e9fe279a83eabbff.jpg';
 const JESUS_IMAGE_URL = 'https://i.pinimg.com/1200x/d2/b3/f0/d2b3f032df40e23e4083ada49899f7c4.jpg';
 const HOME_BG_IMAGE = 'https://i.pinimg.com/736x/49/9f/9c/499f9c29aaa32d7dc3ef14be1eb1de26.jpg';
 
@@ -284,6 +284,73 @@ export default function ChurchInteractiveBooking() {
     }
   };
 
+  // ========================================================
+  // GENERADORES DE MENSAJE DINÁMICOS SEGÚN EL LÍDER
+  // ========================================================
+  const buildLeaderWhatsAppMessage = (info: {
+    leader: Leader;
+    personName: string;
+    personPhone: string;
+    date: string;
+    time: string;
+    modalityText: string;
+  }) => {
+    let specificGreeting = `¡Atención equipo pastoral! ✨`;
+    let customNote = `Se ha agendado una cita de ministración.`;
+
+    if (info.leader.id === 'male') {
+      specificGreeting = `¡Hola Líder Male! 🌸 Tienes una nueva ministración agendada`;
+      customNote = `Enfoque: Acompañamiento, oración y corazón pastoral para mujeres.`;
+    } else if (info.leader.id === 'sebas') {
+      specificGreeting = `¡Hola Líder Sebas! ⚡ Tienes una nueva ministración agendada`;
+      customNote = `Enfoque: Discipulado, liderazgo juvenil y visión ministerial.`;
+    } else if (info.leader.id === 'marce') {
+      specificGreeting = `¡Hola Líder Marce! 🕊️ Tienes una nueva ministración agendada`;
+      customNote = `Enfoque: Consejería familiar, edificación y restauración de hogar.`;
+    }
+
+    return (
+      `${specificGreeting}\n\n` +
+      `📌 *Líder a cargo:* ${info.leader.name} (${info.leader.role})\n` +
+      `👤 *Persona:* ${info.personName}\n` +
+      `📱 *WhatsApp contacto:* ${info.personPhone}\n` +
+      `🗓 *Fecha:* ${info.date}\n` +
+      `⏰ *Hora:* ${info.time}\n` +
+      `📍 *Modalidad:* ${info.modalityText}\n\n` +
+      `📖 *Detalle:* ${customNote}\n\n` +
+      `¡Notificación enviada al 3102345742!`
+    );
+  };
+
+  const buildUserWhatsAppMessage = (info: {
+    leader: Leader;
+    personName: string;
+    date: string;
+    time: string;
+    modalityText: string;
+  }) => {
+    let personalNote = `Estamos felices de tener este tiempo contigo.`;
+
+    if (info.leader.id === 'male') {
+      personalNote = `La *Líder Male* ya está al tanto de tu reserva y orando por este tiempo de edificación y acompañamiento para tu vida.`;
+    } else if (info.leader.id === 'sebas') {
+      personalNote = `El *Líder Sebas* ya recibió tu solicitud y está entusiasmado de conversar contigo sobre propósito, liderazgo y metas.`;
+    } else if (info.leader.id === 'marce') {
+      personalNote = `La *Líder Marce* ya tiene agendado tu espacio y cree firmemente que será un tiempo de bendición, sabiduría y dirección para tu familia.`;
+    }
+
+    return (
+      `¡Hola ${info.personName}! 🌿\n\n` +
+      `Tu cita de ministración con *${info.leader.name}* ha quedado confirmada:\n\n` +
+      `✝️ *Líder:* ${info.leader.name} (${info.leader.role})\n` +
+      `🗓 *Fecha:* ${info.date}\n` +
+      `⏰ *Hora:* ${info.time}\n` +
+      `📍 *Modalidad:* ${info.modalityText}\n\n` +
+      `💬 ${personalNote}\n\n` +
+      `¡Te esperamos con el corazón abierto!`
+    );
+  };
+
   // Agendar y enviar mensaje directo al 3102345742
   const handleBookAppointment = (dayNum: number) => {
     if (!userName.trim() || !userPhone.trim() || !selectedSlotId) return;
@@ -318,19 +385,8 @@ export default function ChurchInteractiveBooking() {
     setLastBooking(bookingInfo);
     setBookingSuccess(true);
 
-    // Mensaje directo al WhatsApp 3102345742
-    const leaderMessage = encodeURIComponent(
-      `¡Hola equipo pastoral! 🕊️\n\n` +
-      `Se ha reservado una nueva cita de ministración con *${bookingInfo.leader.name}* (${bookingInfo.leader.role}):\n\n` +
-      `👤 *Persona:* ${bookingInfo.personName}\n` +
-      `📱 *WhatsApp:* ${bookingInfo.personPhone}\n` +
-      `🗓 *Fecha:* ${bookingInfo.date}\n` +
-      `⏰ *Hora:* ${bookingInfo.time}\n` +
-      `📍 *Modalidad:* ${bookingInfo.modalityText}\n` +
-      `🕊 *Propósito:* ${bookingInfo.leader.focusMessage}\n\n` +
-      `¡Notificación enviada al 3102345742!`
-    );
-
+    // Mensaje personalizado para el líder seleccionado
+    const leaderMessage = encodeURIComponent(buildLeaderWhatsAppMessage(bookingInfo));
     window.open(`https://wa.me/${LEADERS_GLOBAL_WHATSAPP}?text=${leaderMessage}`, '_blank');
   };
 
@@ -341,16 +397,7 @@ export default function ChurchInteractiveBooking() {
       ? lastBooking.personPhone
       : `57${lastBooking.personPhone}`;
 
-    const userMessage = encodeURIComponent(
-      `¡Hola ${lastBooking.personName}! ✨\n\n` +
-      `Tu cita de ministración con *${lastBooking.leader.name}* ha quedado agendada con bendición:\n\n` +
-      `🗓 *Fecha:* ${lastBooking.date}\n` +
-      `⏰ *Hora:* ${lastBooking.time}\n` +
-      `📍 *Lugar:* ${lastBooking.modalityText}\n` +
-      `🕊 *Enfoque:* ${lastBooking.leader.focusMessage}\n\n` +
-      `Estamos orando y preparando este tiempo para ti. ¡Te esperamos!`
-    );
-
+    const userMessage = encodeURIComponent(buildUserWhatsAppMessage(lastBooking));
     window.open(`https://wa.me/${rawNumber}?text=${userMessage}`, '_blank');
   };
 
@@ -533,7 +580,7 @@ export default function ChurchInteractiveBooking() {
         </div>
       </section>
 
-      {/* 5. CALENDARIO CON PERSISTENCIA Y WHATSAPP 3102345742 */}
+      {/* 5. CALENDARIO CON PERSISTENCIA Y MENSAJE SEGÚN LÍDER */}
       <section className="w-full max-w-5xl mx-auto px-4 mb-16">
         <div className="bg-[#11141a] border border-white/10 rounded-3xl p-5 sm:p-8 shadow-2xl">
           
@@ -623,7 +670,7 @@ export default function ChurchInteractiveBooking() {
           {calendarView === 'week' && (
             <div className="pt-6">
               <span className="text-xs text-neutral-400 block mb-4">
-                Toca cualquier día para <strong className="text-sky-400">desplegar los horarios y agendar</strong>:
+                Toca cualquier día para <strong className="text-sky-400">desplegar los horarios y agendar con {selectedLeader.name}</strong>:
               </span>
 
               <div className="grid grid-cols-1 gap-3">
@@ -864,7 +911,7 @@ export default function ChurchInteractiveBooking() {
                                         onClick={handleSendToUserWhatsApp}
                                         className="w-full py-2.5 rounded-xl bg-sky-950/60 hover:bg-sky-900/60 border border-sky-400/40 text-sky-300 font-bold text-xs transition flex items-center justify-center gap-1.5"
                                       >
-                                        <span>📲</span> Enviar copia a mi WhatsApp
+                                        <span>📲</span> Enviar comprobante de {selectedLeader.name} a mi WhatsApp
                                       </button>
                                     </div>
                                   ) : (
@@ -873,14 +920,14 @@ export default function ChurchInteractiveBooking() {
                                       onClick={() => handleBookAppointment(dayNum)}
                                       className="w-full py-3.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-neutral-950 font-bold text-xs uppercase tracking-wider shadow-lg shadow-sky-500/20 transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 font-editorial-bold"
                                     >
-                                      Confirmar y Enviar al WhatsApp de {selectedLeader.name} (3102345742) →
+                                      Agendar cita con {selectedLeader.name} y Enviar a WhatsApp →
                                     </button>
                                   )}
                                 </div>
                               </div>
                             ) : (
                               <p className="text-xs text-neutral-400 py-3 italic">
-                                Este día no tiene horarios disponibles. Por favor selecciona otro marcado en verde.
+                                Este día no tiene horarios disponibles con {selectedLeader.name}. Por favor selecciona otro marcado en verde.
                               </p>
                             )
                           )}
