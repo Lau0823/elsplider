@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --mv-cream: #f4f0ea;
+  --mv-white: #ffffff;
+  --mv-sage: #789894;
+  --mv-ink: #2d2a27;
+  --mv-gold: #bea27a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--mv-cream);
+  color: var(--mv-ink);
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+@keyframes introReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  25% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  75% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+@layer components {
+  .mv-script {
+    font-family: var(--font-allura), cursive;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .mv-nav-link {
+    @apply text-[12px] uppercase tracking-[0.12em] text-[rgba(45,42,39,0.82)] transition hover:text-black;
+  }
+
+  .mv-nav-link-light {
+    @apply text-[12px] uppercase tracking-[0.12em] text-white/90 transition hover:text-white;
+  }
+
+  .mv-button-light {
+    @apply inline-flex items-center justify-center rounded-full bg-white px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-[var(--mv-ink)] transition hover:opacity-90;
+  }
+
+  .mv-button-outline-light {
+    @apply inline-flex items-center justify-center rounded-full border border-white/60 px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-white transition hover:bg-white hover:text-[var(--mv-ink)];
+  }
+
+  .mv-button-dark {
+    @apply inline-flex items-center justify-center rounded-full bg-[var(--mv-sage)] px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-white transition hover:opacity-90;
+  }
+
+  .mv-button-outline-dark {
+    @apply inline-flex items-center justify-center rounded-full border border-[rgba(45,42,39,0.18)] bg-white px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-[var(--mv-ink)] transition hover:bg-[var(--mv-ink)] hover:text-white;
+  }
+
+  .mv-chip {
+    @apply inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm;
+  }
+
+  .mv-title {
+    @apply font-sans text-[30px] font-semibold uppercase leading-[0.95] tracking-[0.03em] md:text-[54px];
+  }
+
+  .mv-section-card {
+    @apply rounded-[28px] bg-white shadow-[0_18px_50px_rgba(0,0,0,0.06)] md:rounded-[34px];
+  }
+
+  .mv-arrow {
+    @apply absolute top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/35 bg-black/20 text-white backdrop-blur-sm transition hover:bg-black/35 md:h-12 md:w-12;
+  }
+
+  .mv-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .mv-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
